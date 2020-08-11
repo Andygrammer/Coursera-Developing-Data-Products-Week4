@@ -1,0 +1,104 @@
+---
+title: "Coursera - DDP Week 4"
+author: "André Marinho"
+date: "11/08/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Reproducible Pitch
+
+Link for deployed Shiny Application:
+
+<https://andygrammer.shinyapps.io/DDP_Week4/>
+
+Link for code of this presentation, and the code for the Shiny App:
+
+<https://github.com/Andygrammer/Coursera-Developing-Data-Products-Week4>
+
+## Dataset Overview
+
+```{r echo=TRUE, comment=NA}
+data <- data.frame(HairEyeColor)
+summary(data)
+head(data)
+```
+
+## UI Code
+
+```{r echo=TRUE}
+library(shiny)
+
+# Define UI for application that draws a histogram
+shinyUI(fluidPage(
+    
+    # Application title
+    titlePanel("Hair and Eye Color of Students Data"),
+    
+    sidebarLayout(
+        sidebarPanel(
+            
+            radioButtons("radio", label=h4("Choose an option"),
+                         choices=list("Hair color" = 1, "Eye color" = 2), 
+                         selected = 1),
+            hr(),
+            h4("Documentation"),
+            h5("This is a Distribution of hair and eye color and sex in 592
+               statistics students."),
+            h5("Please, select an option above to view the frequency
+               of the students at the University of Delaware,
+               comparing their hair or eye color, by sex (male or female)."),
+            h5("Take a look at right to find out the results.")
+        ),
+        
+        # Show a plot of the distribution
+        mainPanel(
+            plotOutput("distPlot")
+        )
+    )
+))
+```
+
+## Server Code
+
+```{r echo=TRUE}
+library(shiny)
+library(ggplot2)
+
+# Define server logic required to draw a plot
+shinyServer(function(input, output) {
+    # Load the dataset
+    student_data <- data.frame(HairEyeColor)
+    
+    # Create a reactive context
+    output$distPlot <- renderPlot({
+        
+        # Get radio button selection
+        radio_choice <- input$radio
+        
+        if(radio_choice == 1) {
+            bar_colors <- c("black", "brown", "red", "yellow")
+            legend_title <- "Hair color"
+            fill_data <- student_data$Hair
+        }
+        else {
+            bar_colors <- c("brown", "blue", "yellow", "green")
+            legend_title <- "Eye color"
+            fill_data <- student_data$Eye
+        }
+        
+        ggplot(student_data, aes(factor(Sex), 
+                                 Freq, 
+                                 fill=fill_data)) +
+            geom_bar(stat="identity", position="dodge") +
+            scale_fill_manual(legend_title, values = bar_colors)
+    })
+
+})
+```
+
+
+
